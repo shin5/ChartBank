@@ -134,6 +134,11 @@ function QuoteCard({ quote, onClick, onRemove }: { quote: QuoteData; onClick: ()
   const bgClass = isUp ? "bg-emerald-500/10 border-emerald-500/20" : "bg-red-500/10 border-red-500/20";
   const arrow = isUp ? "\u25B2" : "\u25BC";
 
+  const prev = quote.prev_close || quote.price;
+  const lowPct = ((quote.low - prev) / prev) * 100;
+  const highPct = ((quote.high - prev) / prev) * 100;
+  const curPct = ((quote.price - prev) / prev) * 100;
+
   const range = quote.high - quote.low || 1;
   const openPct = ((quote.prev_close - quote.low) / range) * 100;
   const closePct = ((quote.price - quote.low) / range) * 100;
@@ -141,6 +146,8 @@ function QuoteCard({ quote, onClick, onRemove }: { quote: QuoteData; onClick: ()
   const bodyWidth = Math.max(Math.abs(closePct - openPct), 0.5);
   const bodyColor = isUp ? "bg-emerald-500" : "bg-red-500";
   const tickColor = isUp ? "bg-emerald-400" : "bg-red-400";
+
+  const fmtPct = (v: number) => (v >= 0 ? "+" : "") + v.toFixed(2) + "%";
 
   return (
     <div
@@ -207,19 +214,20 @@ function QuoteCard({ quote, onClick, onRemove }: { quote: QuoteData; onClick: ()
       </div>
 
       <div className="mt-1">
-        <div className="flex justify-between text-[9px] text-cb-muted mb-1">
-          <span>安値 {formatPrice(quote.low)}</span>
-          <span>高値 {formatPrice(quote.high)}</span>
+        <div className="flex justify-between text-[9px] mb-1">
+          <span className="text-cb-red">{fmtPct(lowPct)}</span>
+          <span className="text-cb-muted">前日終値 0%</span>
+          <span className="text-cb-green">{fmtPct(highPct)}</span>
         </div>
         <div className="relative h-5 flex items-center">
           <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-cb-muted/40 rounded-full" />
           <div
-            className={"absolute top-1/2 -translate-y-1/2 h-3 rounded-sm transition-all " + bodyColor}
-            style={{ left: Math.min(100, Math.max(0, bodyLeft)) + "%", width: Math.min(100 - bodyLeft, Math.max(0.5, bodyWidth)) + "%" }}
+            className="absolute top-1/2 -translate-y-1/2 w-[1px] h-5 bg-cb-muted/70"
+            style={{ left: Math.min(100, Math.max(0, openPct)) + "%" }}
           />
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-[2px] h-4 bg-cb-muted/60 rounded-full"
-            style={{ left: Math.min(100, Math.max(0, openPct)) + "%" }}
+            className={"absolute top-1/2 -translate-y-1/2 h-3 rounded-sm transition-all " + bodyColor}
+            style={{ left: Math.min(100, Math.max(0, bodyLeft)) + "%", width: Math.min(100 - bodyLeft, Math.max(0.5, bodyWidth)) + "%" }}
           />
           <div
             className={"absolute top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full " + tickColor}
@@ -227,8 +235,9 @@ function QuoteCard({ quote, onClick, onRemove }: { quote: QuoteData; onClick: ()
           />
         </div>
         <div className="flex justify-between text-[9px] mt-0.5">
-          <span className="text-cb-muted">始 {formatPrice(quote.prev_close)}</span>
-          <span className={accentColor}>現 {formatPrice(quote.price)}</span>
+          <span className="text-cb-muted">安値 {formatPrice(quote.low)}</span>
+          <span className={accentColor + " font-semibold"}>{fmtPct(curPct)}</span>
+          <span className="text-cb-muted">高値 {formatPrice(quote.high)}</span>
         </div>
       </div>
     </div>
