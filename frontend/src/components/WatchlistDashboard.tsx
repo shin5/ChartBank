@@ -51,16 +51,11 @@ export default function WatchlistDashboard({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-cb-border bg-cb-panel shrink-0">
         <div className="flex items-center gap-1">
           <button
             onClick={() => setFilterMarket("")}
-            className={`px-2.5 py-1 text-xs rounded transition-colors ${
-              !filterMarket
-                ? "bg-cb-accent text-white"
-                : "text-cb-muted hover:text-cb-text hover:bg-cb-border"
-            }`}
+            className={`px-2.5 py-1 text-xs rounded transition-colors ${!filterMarket ? "bg-cb-accent text-white" : "text-cb-muted hover:text-cb-text hover:bg-cb-border"}`}
           >
             全て
           </button>
@@ -68,11 +63,7 @@ export default function WatchlistDashboard({
             <button
               key={m}
               onClick={() => setFilterMarket(m)}
-              className={`px-2.5 py-1 text-xs rounded transition-colors ${
-                filterMarket === m
-                  ? "bg-cb-accent text-white"
-                  : "text-cb-muted hover:text-cb-text hover:bg-cb-border"
-              }`}
+              className={`px-2.5 py-1 text-xs rounded transition-colors ${filterMarket === m ? "bg-cb-accent text-white" : "text-cb-muted hover:text-cb-text hover:bg-cb-border"}`}
             >
               {marketLabel(m)}
             </button>
@@ -100,37 +91,20 @@ export default function WatchlistDashboard({
         </button>
       </div>
 
-      {/* Error */}
       {error && (
-        <div className="px-4 py-2 text-xs text-red-400 bg-red-900/20 shrink-0">
-          {error}
-        </div>
+        <div className="px-4 py-2 text-xs text-red-400 bg-red-900/20 shrink-0">{error}</div>
       )}
 
-      {/* Loading */}
       {loading && quotes.length === 0 && (
         <div className="flex items-center justify-center flex-1 text-sm text-cb-muted">
           <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-              fill="none"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
           読み込み中...
         </div>
       )}
 
-      {/* Cards Grid */}
       {(!loading || quotes.length > 0) && (
         <div className="flex-1 overflow-y-auto p-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
@@ -138,9 +112,7 @@ export default function WatchlistDashboard({
               <QuoteCard
                 key={q.symbol}
                 quote={q}
-                onClick={() =>
-                  onClickSymbol(q.symbol, q.name, q.market as MarketType)
-                }
+                onClick={() => onClickSymbol(q.symbol, q.name, q.market as MarketType)}
                 onRemove={() => onRemoveItem(q.symbol)}
               />
             ))}
@@ -156,165 +128,108 @@ export default function WatchlistDashboard({
   );
 }
 
-/* ─── Quote Card ─── */
-
-function QuoteCard({
-  quote,
-  onClick,
-  onRemove,
-}: {
-  quote: QuoteData;
-  onClick: () => void;
-  onRemove: () => void;
-}) {
+function QuoteCard({ quote, onClick, onRemove }: { quote: QuoteData; onClick: () => void; onRemove: () => void }) {
   const isUp = quote.change >= 0;
   const accentColor = isUp ? "text-cb-green" : "text-cb-red";
-  const bgAccent = isUp
-    ? "bg-emerald-500/10 border-emerald-500/20"
-    : "bg-red-500/10 border-red-500/20";
-  const arrow = isUp ? "▲" : "▼";
+  const bgClass = isUp ? "bg-emerald-500/10 border-emerald-500/20" : "bg-red-500/10 border-red-500/20";
+  const arrow = isUp ? "\u25B2" : "\u25BC";
 
-  // Horizontal candlestick percentages (position within low–high range)
   const range = quote.high - quote.low || 1;
   const openPct = ((quote.prev_close - quote.low) / range) * 100;
   const closePct = ((quote.price - quote.low) / range) * 100;
   const bodyLeft = Math.min(openPct, closePct);
   const bodyWidth = Math.max(Math.abs(closePct - openPct), 0.5);
+  const bodyColor = isUp ? "bg-emerald-500" : "bg-red-500";
+  const tickColor = isUp ? "bg-emerald-400" : "bg-red-400";
 
   return (
     <div
       onClick={onClick}
-      className={`relative group flex flex-col gap-2 p-4 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg ${bgAccent}`}
+      className={"relative group flex flex-col gap-2 p-4 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg " + bgClass}
     >
-      {/* Remove button */}
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
+        onClick={(e) => { e.stopPropagation(); onRemove(); }}
         className="absolute top-2 right-2 p-0.5 rounded text-cb-muted hover:text-cb-red opacity-0 group-hover:opacity-100 transition-opacity"
         title="削除"
       >
-        <svg
-          className="w-3.5 h-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
 
-      {/* Header: Symbol + Market badge */}
       <div className="flex items-start justify-between pr-5">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-bold text-cb-text truncate">
-              {quote.symbol}
-            </span>
+            <span className="text-sm font-bold text-cb-text truncate">{quote.symbol}</span>
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-cb-border/80 text-cb-muted whitespace-nowrap">
               {marketLabel(quote.market)}
             </span>
           </div>
-          <div className="text-xs text-cb-muted truncate mt-0.5">
-            {quote.name}
-          </div>
+          <div className="text-xs text-cb-muted truncate mt-0.5">{quote.name}</div>
         </div>
       </div>
 
-      {/* Price */}
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-bold font-mono text-cb-text leading-none">
           {formatPrice(quote.price)}
         </span>
       </div>
 
-      {/* Change row */}
-      <div className={`flex items-center gap-3 ${accentColor}`}>
+      <div className={"flex items-center gap-3 " + accentColor}>
         <span className="text-sm font-mono font-semibold">
           {arrow} {Math.abs(quote.change_percent).toFixed(2)}%
         </span>
         <span className="text-xs font-mono">
           {isUp ? "+" : ""}
-          {quote.change > 100
-            ? quote.change.toFixed(0)
-            : quote.change.toFixed(4)}
+          {quote.change > 100 ? quote.change.toFixed(0) : quote.change.toFixed(4)}
         </span>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-cb-border/50" />
 
-      {/* Stats grid */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
         <div className="flex justify-between">
           <span className="text-cb-muted">高値</span>
-          <span className="font-mono text-cb-text">
-            {formatPrice(quote.high)}
-          </span>
+          <span className="font-mono text-cb-text">{formatPrice(quote.high)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-cb-muted">安値</span>
-          <span className="font-mono text-cb-text">
-            {formatPrice(quote.low)}
-          </span>
+          <span className="font-mono text-cb-text">{formatPrice(quote.low)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-cb-muted">前日終値</span>
-          <span className="font-mono text-cb-text">
-            {formatPrice(quote.prev_close)}
-          </span>
+          <span className="font-mono text-cb-text">{formatPrice(quote.prev_close)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-cb-muted">出来高</span>
-          <span className="font-mono text-cb-text">
-            {formatVolume(quote.volume)}
-          </span>
+          <span className="font-mono text-cb-text">{formatVolume(quote.volume)}</span>
         </div>
       </div>
 
-      {/* Horizontal candlestick */}
       <div className="mt-1">
         <div className="flex justify-between text-[9px] text-cb-muted mb-1">
           <span>安値 {formatPrice(quote.low)}</span>
           <span>高値 {formatPrice(quote.high)}</span>
         </div>
         <div className="relative h-5 flex items-center">
-          {/* Wick (thin line: full low–high range) */}
           <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-cb-muted/40 rounded-full" />
-          {/* Body (thick bar: open–close / prev_close–price) */}
           <div
-            className={`absolute top-1/2 -translate-y-1/2 h-3 rounded-sm transition-all ${
-              isUp ? "bg-emerald-500" : "bg-red-500"
-            }`}
-            style={{
-              left: `${Math.min(100, Math.max(0, bodyLeft))}%`,
-              width: `${Math.min(100 - bodyLeft, Math.max(0.5, bodyWidth))}%`,
-            }}
+            className={"absolute top-1/2 -translate-y-1/2 h-3 rounded-sm transition-all " + bodyColor}
+            style={{ left: Math.min(100, Math.max(0, bodyLeft)) + "%", width: Math.min(100 - bodyLeft, Math.max(0.5, bodyWidth)) + "%" }}
           />
-          {/* Open tick (prev_close) */}
           <div
             className="absolute top-1/2 -translate-y-1/2 w-[2px] h-4 bg-cb-muted/60 rounded-full"
-            style={{ left: `${Math.min(100, Math.max(0, openPct))}%` }}
+            style={{ left: Math.min(100, Math.max(0, openPct)) + "%" }}
           />
-          {/* Close tick (current price) — highlighted */}
           <div
-            className={`absolute top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full ${
-              isUp ? "bg-emerald-400" : "bg-red-400"
-            }`}
-            style={{ left: `${Math.min(100, Math.max(0, closePct))}%` }}
+            className={"absolute top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full " + tickColor}
+            style={{ left: Math.min(100, Math.max(0, closePct)) + "%" }}
           />
         </div>
         <div className="flex justify-between text-[9px] mt-0.5">
           <span className="text-cb-muted">始 {formatPrice(quote.prev_close)}</span>
           <span className={accentColor}>現 {formatPrice(quote.price)}</span>
         </div>
-      </div>
       </div>
     </div>
   );
