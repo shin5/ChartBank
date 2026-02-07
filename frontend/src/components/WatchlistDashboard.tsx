@@ -174,10 +174,12 @@ function QuoteCard({
     : "bg-red-500/10 border-red-500/20";
   const arrow = isUp ? "▲" : "▼";
 
-  const rangePct =
-    quote.high !== quote.low
-      ? ((quote.price - quote.low) / (quote.high - quote.low)) * 100
-      : 50;
+  // Horizontal candlestick percentages (position within low–high range)
+  const range = quote.high - quote.low || 1;
+  const openPct = ((quote.prev_close - quote.low) / range) * 100;
+  const closePct = ((quote.price - quote.low) / range) * 100;
+  const bodyLeft = Math.min(openPct, closePct);
+  const bodyWidth = Math.max(Math.abs(closePct - openPct), 0.5);
 
   return (
     <div
@@ -276,28 +278,43 @@ function QuoteCard({
         </div>
       </div>
 
-      {/* Day range bar */}
+      {/* Horizontal candlestick */}
       <div className="mt-1">
-        <div className="flex justify-between text-[9px] text-cb-muted mb-0.5">
+        <div className="flex justify-between text-[9px] text-cb-muted mb-1">
           <span>安値 {formatPrice(quote.low)}</span>
           <span>高値 {formatPrice(quote.high)}</span>
         </div>
-        <div className="relative h-1.5 rounded-full bg-cb-border/50 overflow-hidden">
+        <div className="relative h-5 flex items-center">
+          {/* Wick (thin line: full low–high range) */}
+          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-cb-muted/40 rounded-full" />
+          {/* Body (thick bar: open–close / prev_close–price) */}
           <div
-            className={`absolute top-0 left-0 h-full rounded-full transition-all ${
+            className={`absolute top-1/2 -translate-y-1/2 h-3 rounded-sm transition-all ${
               isUp ? "bg-emerald-500" : "bg-red-500"
             }`}
-            style={{ width: `${Math.min(100, Math.max(0, rangePct))}%` }}
-          />
-          {/* Current price indicator */}
-          <div
-            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white border-2 border-cb-bg shadow-sm"
             style={{
-              left: `${Math.min(100, Math.max(0, rangePct))}%`,
-              transform: "translate(-50%, -50%)",
+              left: `${Math.min(100, Math.max(0, bodyLeft))}%`,
+              width: `${Math.min(100 - bodyLeft, Math.max(0.5, bodyWidth))}%`,
             }}
           />
+          {/* Open tick (prev_close) */}
+          <div
+            className="absolute top-1/2 -translate-y-1/2 w-[2px] h-4 bg-cb-muted/60 rounded-full"
+            style={{ left: `${Math.min(100, Math.max(0, openPct))}%` }}
+          />
+          {/* Close tick (current price) — highlighted */}
+          <div
+            className={`absolute top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full ${
+              isUp ? "bg-emerald-400" : "bg-red-400"
+            }`}
+            style={{ left: `${Math.min(100, Math.max(0, closePct))}%` }}
+          />
         </div>
+        <div className="flex justify-between text-[9px] mt-0.5">
+          <span className="text-cb-muted">始 {formatPrice(quote.prev_close)}</span>
+          <span className={accentColor}>現 {formatPrice(quote.price)}</span>
+        </div>
+      </div>
       </div>
     </div>
   );
